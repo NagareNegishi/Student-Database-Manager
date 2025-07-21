@@ -1,7 +1,11 @@
 package nz.ac.wgtn.swen301.assignment1;
 
 import nz.ac.wgtn.swen301.studentdb.*;
+
+import java.sql.*;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A student manager providing basic CRUD operations for instances of Student, and a read operation for instances of Degree.
@@ -14,9 +18,19 @@ public class StudentManager {
     static {
         StudentDB.init();
     }
+
     // DO NOT REMOVE BLOCK ENDS HERE
 
     // THE FOLLOWING METHODS MUST BE IMPLEMENTED :
+
+    /**
+     * Return the existing instance, it suggests this class need to Cache instances
+     * Which likely connect to memory leak document later??
+     * For now, lets use map of id and instance with private static
+     * Later study and concern WeakReference<???> for instance
+     */
+    private static Map<String, Student> studentCache = new HashMap<>(); // ID, Student
+    private static Map<String, Degree> degreeCache = new HashMap<>(); // ID, Degree
 
     /**
      * Return a student instance with values from the row with the respective id in the database.
@@ -27,7 +41,35 @@ public class StudentManager {
      * This functionality is to be tested in nz.ac.wgtn.swen301.assignment1.TestStudentManager::testFetchStudent (followed by optional numbers if multiple tests are used)
      */
     public static Student fetchStudent(String id) throws NoSuchRecordException {
-        return null;
+        if (id == null || id.isEmpty()) {
+            throw new IllegalArgumentException("Student ID must not be null or empty");
+        }
+
+        // Case already exists
+        if (studentCache.containsKey(id)) return studentCache.get(id);
+
+        // Fetch from the database
+        try (Connection conn = DriverManager.getConnection("jdbc:derby:memory:studentdb")){
+            PreparedStatement stmt = conn.prepareStatement("SELECT * FROM STUDENTS WHERE id = ?");
+            stmt.setString(1, id);
+            ResultSet results = stmt.executeQuery();
+
+            // ID is unique, and none of provided record has null
+            if (!results.next()) throw new NoSuchRecordException();
+
+            // STUDENTS table is: (id, first_name, name, degree)
+            String firstname = results.getString("first_name");
+            String name = results.getString("name");
+            String degreeID = results.getString("degree");
+            Degree degree = fetchDegree(degreeID);
+            // but Constructor is (id, name, firstName, degree), bad design, but I can not change template
+            Student student = new Student(id, name, firstname, degree);
+
+            studentCache.put(id, student);
+            return student;
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to fetch student with ID: " + id, e);
+        }
     }
 
     /**
@@ -39,7 +81,30 @@ public class StudentManager {
      * This functionality is to be tested in nz.ac.wgtn.swen301.assignment1.TestStudentManager::testFetchDegree (followed by optional numbers if multiple tests are used)
      */
     public static Degree fetchDegree(String id) throws NoSuchRecordException {
-        return null;
+        if (id == null || id.isEmpty()) {
+            throw new IllegalArgumentException("Degree ID must not be null or empty");
+        }
+
+        // Case already exists
+        if (degreeCache.containsKey(id)) return degreeCache.get(id);
+
+        // Fetch from the database
+        try (Connection conn = DriverManager.getConnection("jdbc:derby:memory:studentdb")){
+            PreparedStatement stmt = conn.prepareStatement("SELECT * FROM DEGREES WHERE id = ?");
+            stmt.setString(1, id);
+            ResultSet results = stmt.executeQuery();
+
+            // ID is unique, and none of provided record has null
+            if (!results.next()) throw new NoSuchRecordException();
+
+            // DEGREES table is :(id, name)
+            String name = results.getString("name");
+            Degree degree =  new Degree(id, name);
+            degreeCache.put(id, degree);
+            return degree;
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to fetch degree with ID: " + id, e);
+        }
     }
 
     /**
