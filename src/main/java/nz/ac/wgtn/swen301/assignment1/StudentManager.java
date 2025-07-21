@@ -29,8 +29,8 @@ public class StudentManager {
      * For now, lets use map of id and instance with private static
      * Later study and concern WeakReference<???> for instance
      */
-    private static Map<String, Student> studentCache = new HashMap<>(); // ID, Student
-    private static Map<String, Degree> degreeCache = new HashMap<>(); // ID, Degree
+    private static final Map<String, Student> studentCache = new HashMap<>(); // ID, Student
+    private static final Map<String, Degree> degreeCache = new HashMap<>(); // ID, Degree
 
     /**
      * Return a student instance with values from the row with the respective id in the database.
