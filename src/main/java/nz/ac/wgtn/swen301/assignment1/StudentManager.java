@@ -35,8 +35,8 @@ public class StudentManager {
     /**
      * Return a student instance with values from the row with the respective id in the database.
      * If an instance with this id already exists, return the existing instance and do not create a second one.
-     * @param id
-     * @return
+     * @param id the unique identifier of the student to retrieve; must not be null or empty
+     * @return Student instance with the specified ID
      * @throws NoSuchRecordException if no record with such an id exists in the database
      * This functionality is to be tested in nz.ac.wgtn.swen301.assignment1.TestStudentManager::testFetchStudent (followed by optional numbers if multiple tests are used)
      */
@@ -75,8 +75,8 @@ public class StudentManager {
     /**
      * Return a degree instance with values from the row with the respective id in the database.
      * If an instance with this id already exists, return the existing instance and do not create a second one.
-     * @param id
-     * @return
+     * @param id the unique identifier of the degree to retrieve; must not be null or empty
+     * @return Degree instance with the specified ID
      * @throws NoSuchRecordException if no record with such an id exists in the database
      * This functionality is to be tested in nz.ac.wgtn.swen301.assignment1.TestStudentManager::testFetchDegree (followed by optional numbers if multiple tests are used)
      */
