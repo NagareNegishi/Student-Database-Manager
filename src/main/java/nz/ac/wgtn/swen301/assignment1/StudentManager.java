@@ -137,7 +137,7 @@ public class StudentManager {
      * After executing this command, the attribute values of the object and the respective database value are consistent.
      * Note that names and first names can only be max 1o characters long.
      * There is no special handling required to enforce this, just ensure that tests only use values with < 10 characters.
-     * @param student
+     * @param student student instance to be updated in database
      * @throws NoSuchRecordException if no record corresponding to this student instance exists in the database
      * This functionality is to be tested in nz.ac.wgtn.swen301.assignment1.TestStudentManager::testUpdate (followed by optional numbers if multiple tests are used)
      */
@@ -147,12 +147,7 @@ public class StudentManager {
         }
 
         // not required, but helpful
-        if (student.getName().length() > 10) {
-            throw new IllegalArgumentException("student name must be up to 10 characters");
-        }
-        if (student.getFirstName().length() > 10) {
-            throw new IllegalArgumentException("student first name must be up to 10 characters");
-        }
+        validateNameLengths(student.getName(), student.getFirstName());
 
         /*
         * ASK!!!!!!!!!!!!!!!!!!!
@@ -166,6 +161,8 @@ public class StudentManager {
         *
         * also can i remove dummy test?
         * weak reference for map
+        *
+        * is name <10 or <=10??
         * */
 
         // Update database first
@@ -198,6 +195,29 @@ public class StudentManager {
      */
     public static Student newStudent(String name,String firstName,Degree degree) {
         return null;
+
+        /*
+         * If the Degree does not exist, create a new row in the database for it.
+         *  -> what if this degree has different name? update? reject?
+         *  -> if null id generate id for it??
+         *
+         * check do i have to fill gap? (i hope not)
+         */
+
+
+        /*
+         * so many unclear factor, can not do test driven approach
+         *
+         *
+         * Implementation assumptions:
+         * 1. ID generation: Simple increment (highest + 1), no gap-filling
+         * 2. Degree ID: Must be non-null, reject if null
+         * 3. Degree conflicts: If ID exists with different name, use existing (ignore name)
+         * 4. New degrees: Only insert if ID doesn't exist
+         */
+
+
+
     }
 
     /**
@@ -217,6 +237,67 @@ public class StudentManager {
     static void reset() {
         studentCache.clear();
         degreeCache.clear();
+    }
+
+    /**
+     * Helper method to ensure names and first names of Student can only be max 10 characters long.
+     * As database do not have not null constraint, it will not prevent null
+     * @param name name of Student
+     * @param firstName first name of Student
+     */
+    private static void validateNameLengths(String name, String firstName){
+        if (name != null && name.length() > 10) {
+            throw new IllegalArgumentException("student name must be up to 10 characters"); // check if its < 10 or <= 10!!!
+        }
+        if (firstName != null && firstName.length() > 10) {
+            throw new IllegalArgumentException("student first name must be up to 10 characters");
+        }
+    }
+
+    /**
+     * Generates the next available student ID by finding the highest existing ID and incrementing it.
+     * Handles the case where the STUDENTS table is empty by returning "id0".
+     * @return the next available student ID in format "id{number}"
+     * @throws RuntimeException if a database error occurs while querying for the maximum ID
+     */
+    private static String nextStudentId() {
+        try (Connection conn = DriverManager.getConnection("jdbc:derby:memory:studentdb")){
+            Statement stmt = conn.createStatement();
+            ResultSet results = stmt.executeQuery("SELECT MAX(id) FROM STUDENTS"); // will be id or null
+            if (results.next()) {
+                String id = results.getString(1);
+                if (id == null) return "id0"; // table is empty
+                String number = id.substring(2);
+                int next = Integer.parseInt(number) + 1;
+                return "id" + next;
+            }
+            return "id0"; // Should never reach here
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to generate next student ID", e);
+        }
+    }
+
+    /**
+     * Generates the next available degree ID by finding the highest existing ID and incrementing it.
+     * Handles the case where the DEGREES table is empty by returning "deg0".
+     * @return the next available Degree ID in format "deg{number}"
+     * @throws RuntimeException if a database error occurs while querying for the maximum ID
+     */
+    private static String nextDegreeId() {
+        try (Connection conn = DriverManager.getConnection("jdbc:derby:memory:studentdb")){
+            Statement stmt = conn.createStatement();
+            ResultSet results = stmt.executeQuery("SELECT MAX(id) FROM DEGREES"); // will be id or null
+            if (results.next()) {
+                String id = results.getString(1);
+                if (id == null) return "deg0"; // table is empty
+                String number = id.substring(3);
+                int next = Integer.parseInt(number) + 1;
+                return "deg" + next;
+            }
+            return "deg0"; // Should never reach here
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to generate next degree ID", e);
+        }
     }
 
 
