@@ -110,11 +110,26 @@ public class StudentManager {
     /**
      * Delete a student instance from the database.
      * I.e., after this, trying to read a student with this id will result in a NoSuchRecordException.
-     * @param student
+     * @param student student instance to be removed from database
      * @throws NoSuchRecordException if no record corresponding to this student instance exists in the database
      * This functionality is to be tested in nz.ac.wgtn.swen301.assignment1.TestStudentManager::testRemove
      */
-    public static void remove(Student student) throws NoSuchRecordException {}
+    public static void remove(Student student) throws NoSuchRecordException {
+        if (student == null) {
+            throw new IllegalArgumentException("student must not be null");
+        }
+        // Delete from database first
+        try (Connection conn = DriverManager.getConnection("jdbc:derby:memory:studentdb")){
+            PreparedStatement stmt = conn.prepareStatement("DELETE FROM STUDENTS WHERE id = ?");
+            stmt.setString(1, student.getId());
+            int rowsAffected  = stmt.executeUpdate();
+            if (rowsAffected == 0) throw new NoSuchRecordException();
+            // rowsAffected should be 1, but enforcing database structure is not this functions responsibility
+            studentCache.remove(student.getId()); // clear cache
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to remove student: " + student.getId(), e);
+        }
+    }
 
     /**
      * Update (synchronize) a student instance with the database.
@@ -126,7 +141,20 @@ public class StudentManager {
      * @throws NoSuchRecordException if no record corresponding to this student instance exists in the database
      * This functionality is to be tested in nz.ac.wgtn.swen301.assignment1.TestStudentManager::testUpdate (followed by optional numbers if multiple tests are used)
      */
-    public static void update(Student student) throws NoSuchRecordException {}
+    public static void update(Student student) throws NoSuchRecordException {
+        if (student == null) {
+            throw new IllegalArgumentException("student must not be null");
+        }
+
+        /*
+        * ASK!!!!!!!!!!!!!!!!!!!
+        * - how i should treat name? can update or not?
+        * - how should i treat invalid degree? can i leave it to database?
+        * - if i handle? is it illigal? nosuch? or update
+        * */
+
+
+    }
 
 
     /**
