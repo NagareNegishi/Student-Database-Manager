@@ -46,7 +46,7 @@ public class TestStudentManager {
     }
 
     @Test
-    public void testFetchStudent2()  throws Exception {
+    public void testFetchStudent2() {
         // Test case 2: NoSuchRecordException for invalid ID
         assertThrows(NoSuchRecordException.class, () -> {
             StudentManager.fetchStudent("id-1"); // negative
@@ -63,7 +63,7 @@ public class TestStudentManager {
     }
 
     @Test
-    public void testFetchStudent3()  throws Exception {
+    public void testFetchStudent3() {
         // Test case 3: IllegalArgumentException for null/empty ID
         assertThrows(IllegalArgumentException.class, () -> {
             StudentManager.fetchStudent(null);
@@ -95,7 +95,7 @@ public class TestStudentManager {
     }
 
     @Test
-    public void testFetchDegree2() throws Exception {
+    public void testFetchDegree2() {
         // Test case 2: NoSuchRecordException for invalid ID
         assertThrows(NoSuchRecordException.class, () -> {
             StudentManager.fetchDegree("deg-1"); // negative
@@ -112,7 +112,7 @@ public class TestStudentManager {
     }
 
     @Test
-    public void testFetchDegree3() throws Exception {
+    public void testFetchDegree3() {
         // Test case 3: IllegalArgumentException for null/empty ID
         assertThrows(IllegalArgumentException.class, () -> {
             StudentManager.fetchDegree(null);
@@ -144,7 +144,7 @@ public class TestStudentManager {
     }
 
     @Test
-    public void testRemove2() throws Exception {
+    public void testRemove2() {
         // Test case 2: NoSuchRecordException for invalid student
         Student invalidStudent = new Student("id-1", "invalid", "invalid", null);
         assertThrows(NoSuchRecordException.class, () -> {
@@ -153,7 +153,7 @@ public class TestStudentManager {
     }
 
     @Test
-    public void testRemove3() throws Exception {
+    public void testRemove3() {
         // Test case 3: IllegalArgumentException for null
         assertThrows(IllegalArgumentException.class, () -> {
             StudentManager.remove(null);
