@@ -300,5 +300,67 @@ public class StudentManager {
         }
     }
 
+    /**
+     * Inserts a new student record into the STUDENTS table and updates the cache.
+     * @param student the student to insert
+     * @throws RuntimeException if the database insertion fails
+     */
+    private static void insertStudent(Student student) {
+        if (student == null) throw new IllegalArgumentException("student must not be null");
+        try (Connection conn = DriverManager.getConnection("jdbc:derby:memory:studentdb")){
+            PreparedStatement stmt = conn.prepareStatement(
+                    "INSERT INTO STUDENTS (id, first_name, name, degree) VALUES (?,?,?,?)"
+            );
+            stmt.setString(1, student.getId());
+            stmt.setString(2, student.getFirstName());
+            stmt.setString(3, student.getName());
+            stmt.setString(4, student.getDegree().getId());
+            int rowsAffected  = stmt.executeUpdate();
+            if (rowsAffected == 0) throw new RuntimeException("Failed to insert student");
+            studentCache.put(student.getId(), student);
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to insert student", e);
+        }
+    }
+
+    /**
+     * Inserts a new degree record into the DEGREES table and updates the cache.
+     * @param degree the degree to insert
+     * @throws RuntimeException if the database insertion fails
+     */
+    private static void insertDegree(Degree degree) {
+        if (degree == null) throw new IllegalArgumentException("degree must not be null");
+        try (Connection conn = DriverManager.getConnection("jdbc:derby:memory:studentdb")){
+            PreparedStatement stmt = conn.prepareStatement("INSERT INTO DEGREES (id, name) VALUES (?,?)");
+            stmt.setString(1, degree.getId());
+            stmt.setString(2, degree.getName());
+            int rowsAffected  = stmt.executeUpdate();
+            if (rowsAffected == 0) throw new RuntimeException("Failed to insert degree");
+            degreeCache.put(degree.getId(), degree);
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to insert degree", e);
+        }
+    }
+
+    /**
+     * Checks if a degree with the specified ID exists in the DEGREES table.
+     * @param degreeId the degree ID to check
+     * @return true if degree exists, false otherwise
+     * @throws RuntimeException if database error occurs
+     */
+    private static boolean degreeExists(String degreeId) {
+        if (degreeId == null) throw new IllegalArgumentException("degreeId must not be null");
+        try (Connection conn = DriverManager.getConnection("jdbc:derby:memory:studentdb")) {
+            PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM DEGREES WHERE id = ?");
+            stmt.setString(1, degreeId);
+            ResultSet results = stmt.executeQuery();
+            if (results.next()) { // COUNT(*) returns int
+                return results.getInt(1) > 0;
+            }
+            return false;
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to check degree existence", e);
+        }
+    }
 
 }
