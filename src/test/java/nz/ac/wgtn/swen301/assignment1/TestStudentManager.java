@@ -29,6 +29,11 @@ public class TestStudentManager {
         assertNotNull(student);
     }
 
+    @BeforeEach
+    public void resetCache() {
+        StudentManager.reset();
+    }
+
     // TestStudentManager::testFetchStudent
     // id0 will always be: James Smith, deg0 (BSc Computer Science)
     // id1 will always be: John Jones, deg1 (BSc Computer Graphics)

@@ -146,16 +146,43 @@ public class StudentManager {
             throw new IllegalArgumentException("student must not be null");
         }
 
+        // not required, but helpful
+        if (student.getName().length() > 10) {
+            throw new IllegalArgumentException("student name must be up to 10 characters");
+        }
+        if (student.getFirstName().length() > 10) {
+            throw new IllegalArgumentException("student first name must be up to 10 characters");
+        }
+
         /*
         * ASK!!!!!!!!!!!!!!!!!!!
         * - how i should treat name? can update or not?
         * - how should i treat invalid degree? can i leave it to database?
         * - if i handle? is it illigal? nosuch? or update
+        *
+        * - i have length check for now, but should i actually leave it to database?
+        *   ..... i think actually data base should reject it, but preventing unnecessary connection would increase performance
+        *
+        *
+        * also can i remove dummy test?
+        * weak reference for map
         * */
 
-
+        // Update database first
+        try (Connection conn = DriverManager.getConnection("jdbc:derby:memory:studentdb")){
+            PreparedStatement stmt = conn.prepareStatement("UPDATE STUDENTS SET first_name = ?, name = ?, degree = ? WHERE id = ?");
+            stmt.setString(1, student.getFirstName());
+            stmt.setString(2, student.getName());
+            stmt.setString(3, student.getDegree().getId());
+            stmt.setString(4, student.getId());
+            int rowsAffected  = stmt.executeUpdate();
+            if (rowsAffected == 0) throw new NoSuchRecordException();
+            // rowsAffected should be 1, but enforcing database structure is not this functions responsibility
+            studentCache.put(student.getId(), student);
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to update student: " + student.getId(), e);
+        }
     }
-
 
     /**
      * Create a new student with the values provided, and save it to the database.
@@ -182,6 +209,15 @@ public class StudentManager {
         return null;
     }
 
+
+    /**
+     * FOR TESTING ONLY - clears caches between tests
+     * Should only be called from test fixtures (@BeforeEach/@AfterEach)
+     */
+    static void reset() {
+        studentCache.clear();
+        degreeCache.clear();
+    }
 
 
 }
