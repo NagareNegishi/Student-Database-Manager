@@ -5,7 +5,9 @@ import nz.ac.wgtn.swen301.studentdb.*;
 import java.sql.*;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A student manager providing basic CRUD operations for instances of Student, and a read operation for instances of Degree.
@@ -146,23 +148,18 @@ public class StudentManager {
             throw new IllegalArgumentException("student must not be null");
         }
 
-        // not required, but helpful
+        // not required, but help performance
         validateNameLengths(student.getName(), student.getFirstName());
 
         /*
         * ASK!!!!!!!!!!!!!!!!!!!
-        * - how i should treat name? can update or not?
-        * - how should i treat invalid degree? can i leave it to database?
-        * - if i handle? is it illigal? nosuch? or update
         *
-        * - i have length check for now, but should i actually leave it to database?
-        *   ..... i think actually data base should reject it, but preventing unnecessary connection would increase performance
+        * - how i should treat name? can update or not?  -> do not update name
         *
+        * - also can i remove dummy test? -> keep it
+        * - weak reference for map
         *
-        * also can i remove dummy test?
-        * weak reference for map
-        *
-        * is name <10 or <=10??
+        * - is name <10 or <=10??
         * */
 
         // Update database first
@@ -194,41 +191,52 @@ public class StudentManager {
      * This functionality is to be tested in nz.ac.wgtn.swen301.assignment1.TestStudentManager::testNewStudent (followed by optional numbers if multiple tests are used)
      */
     public static Student newStudent(String name,String firstName,Degree degree) {
-        return null;
 
-        /*
-         * If the Degree does not exist, create a new row in the database for it.
-         *  -> what if this degree has different name? update? reject?
-         *  -> if null id generate id for it??
-         *
-         * check do i have to fill gap? (i hope not)
-         */
+        validateNameLengths(name, firstName);
+        if (degree == null) throw new IllegalArgumentException("degree must not be null");
 
+        // can i reject null id?? !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-        /*
-         * so many unclear factor, can not do test driven approach
-         *
-         *
-         * Implementation assumptions:
-         * 1. ID generation: Simple increment (highest + 1), no gap-filling
-         * 2. Degree ID: Must be non-null, reject if null
-         * 3. Degree conflicts: If ID exists with different name, use existing (ignore name)
-         * 4. New degrees: Only insert if ID doesn't exist
-         */
-
-
-
+        Degree fixed;
+        if (degree.getId() != null && degreeExists(degree.getId())) {
+            // Use existing degree in database to override this instance to sync (prevent name mismatch)
+            try {
+                fixed = fetchDegree(degree.getId());
+            } catch (NoSuchRecordException e) {
+                fixed = degree;
+            }
+        } else {
+            // if id is null, provide next available id
+            // It depends on requirement, if we can reject null id, it is simple           !!!!!!!!!!!!!!!!!!!!!!!!!
+            String degreeId = (degree.getId() != null) ? degree.getId() : nextDegreeId();
+            fixed = new Degree(degreeId, degree.getName());
+            insertDegree(fixed);
+        }
+        String studentId = nextStudentId();
+        Student student = new Student(studentId, name, firstName, fixed);
+        insertStudent(student);
+        return student;
     }
 
     /**
      * Get all student ids currently being used in the database.
-     * @return
+     * @return Collection<String>, use HashSet, since id is unique (primary key)
      * This functionality is to be tested in nz.ac.wgtn.swen301.assignment1.TestStudentManager::testFetchAllStudentIds (followed by optional numbers if multiple tests are used)
      */
     public static Collection<String> fetchAllStudentIds() {
-        return null;
+        Set<String> ids = new HashSet<>();
+        try (Connection conn = DriverManager.getConnection("jdbc:derby:memory:studentdb")){
+            Statement stmt = conn.createStatement();
+            ResultSet results = stmt.executeQuery("SELECT id FROM STUDENTS");
+            while (results.next()) {
+                String id = results.getString("id");
+                ids.add(id);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to get all student IDs", e);
+        }
+        return ids;
     }
-
 
     /**
      * FOR TESTING ONLY - clears caches between tests
@@ -257,6 +265,11 @@ public class StudentManager {
     /**
      * Generates the next available student ID by finding the highest existing ID and incrementing it.
      * Handles the case where the STUDENTS table is empty by returning "id0".
+     *
+     *
+     * It will not fill the gap of existing ids      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     *
+     *
      * @return the next available student ID in format "id{number}"
      * @throws RuntimeException if a database error occurs while querying for the maximum ID
      */
@@ -362,5 +375,4 @@ public class StudentManager {
             throw new RuntimeException("Failed to check degree existence", e);
         }
     }
-
 }

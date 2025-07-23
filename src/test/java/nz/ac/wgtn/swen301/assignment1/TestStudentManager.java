@@ -7,6 +7,8 @@ import nz.ac.wgtn.swen301.studentdb.StudentDB;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -221,5 +223,105 @@ public class TestStudentManager {
         });
     }
 
+    // TestStudentManager::testNewStudent
+
+    @Test
+    public void testNewStudent1() throws Exception {
+        // Test case 1: Valid student, existing degree
+        Degree degree = StudentManager.fetchDegree("deg0");
+        Student student1 = StudentManager.newStudent("valid", "yes", degree);
+        Student student2 = StudentManager.fetchStudent(student1.getId());
+
+        assertNotNull(student1);
+        assertEquals(student1.getId(), student2.getId());
+        assertEquals("yes", student1.getFirstName());
+        assertEquals("valid", student1.getName());
+        assertEquals("deg0", student1.getDegree().getId());
+        assertEquals("BSc Computer Science", student1.getDegree().getName());
+
+        assertEquals("yes", student2.getFirstName());
+        assertEquals("valid", student2.getName());
+        assertEquals("deg0", student2.getDegree().getId());
+        assertEquals("BSc Computer Science", student2.getDegree().getName());
+    }
+
+    @Test
+    public void testNewStudent2() throws Exception {
+        // Test case 2: Valid student, new degree
+        Degree degree = new Degree("deg99", "test"); // id varchar(5), 99 is max
+        Student student1 = StudentManager.newStudent("valid", "yes", degree);
+        Student student2 = StudentManager.fetchStudent(student1.getId());
+
+        assertNotNull(student1);
+        assertEquals(student1.getId(), student2.getId());
+        assertEquals("yes", student1.getFirstName());
+        assertEquals("valid", student1.getName());
+        assertEquals("deg99", student1.getDegree().getId());
+        assertEquals("test", student1.getDegree().getName());
+
+        assertEquals("yes", student2.getFirstName());
+        assertEquals("valid", student2.getName());
+        assertEquals("deg99", student2.getDegree().getId());
+        assertEquals("test", student2.getDegree().getName());
+    }
+
+    @Test
+    public void testNewStudent3() throws Exception {
+        // Test case 3: Valid student, new degree with null id
+        Degree degree = new Degree(null, "test"); // id varchar(5), 99 is max
+        Student student1 = StudentManager.newStudent("valid", "yes", degree);
+        Student student2 = StudentManager.fetchStudent(student1.getId());
+
+        assertNotNull(student1);
+        assertEquals(student1.getId(), student2.getId());
+        assertEquals(student1.getDegree().getId(), student2.getDegree().getId());
+        assertTrue(student1.getDegree().getId().startsWith("deg"));
+        assertEquals("yes", student1.getFirstName());
+        assertEquals("valid", student1.getName());
+        assertEquals("test", student1.getDegree().getName());
+
+        assertEquals("yes", student2.getFirstName());
+        assertEquals("valid", student2.getName());
+        assertEquals("test", student2.getDegree().getName());
+    }
+
+    @Test
+    public void testNewStudent4() throws Exception {
+        // Test case 4: IllegalArgumentException for null and long name
+        Degree degree = StudentManager.fetchDegree("deg0");
+        assertThrows(IllegalArgumentException.class, () -> {
+            StudentManager.newStudent("longlonglonglong", "yes", degree);
+        });
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            StudentManager.newStudent("valid", "longlonglonglong", degree);
+        });
+    }
+
+    // TestStudentManager::testFetchAllStudentIds
+
+    @Test
+    public void testFetchAllStudentIds1(){
+        // Test case 1: Varify set
+        Set<String> ids = (Set<String>) StudentManager.fetchAllStudentIds();
+        assertEquals(10000, ids.size());
+        assertTrue(ids.contains("id1"));
+        assertTrue(ids.contains("id9999"));
+        assertFalse(ids.contains("id-1"));
+    }
+
+    @Test
+    public void testFetchAllStudentIds2() throws NoSuchRecordException {
+        // Test case 2: Varify set after insert new student
+        Degree degree = StudentManager.fetchDegree("deg0");
+        Student student = StudentManager.newStudent("valid", "yes", degree);
+        Set<String> ids = (Set<String>) StudentManager.fetchAllStudentIds();
+        assertEquals(10001, ids.size());
+        assertTrue(ids.contains(student.getId()));
+        assertTrue(ids.contains("id1"));
+        assertTrue(ids.contains("id9999"));
+        assertFalse(ids.contains("id"));
+        assertFalse(ids.contains("id1111111111111"));
+    }
 
 }
