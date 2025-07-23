@@ -7,7 +7,11 @@ import nz.ac.wgtn.swen301.studentdb.StudentDB;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Random;
+
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -302,26 +306,46 @@ public class TestStudentManager {
 
     @Test
     public void testFetchAllStudentIds1(){
-        // Test case 1: Varify set
-        Set<String> ids = (Set<String>) StudentManager.fetchAllStudentIds();
+        // Test case 1: Verify set
+        Collection<String> ids = StudentManager.fetchAllStudentIds();
+        assertNotNull(ids);
         assertEquals(10000, ids.size());
-        assertTrue(ids.contains("id1"));
+        assertTrue(ids.contains("id0"));
         assertTrue(ids.contains("id9999"));
         assertFalse(ids.contains("id-1"));
     }
 
     @Test
     public void testFetchAllStudentIds2() throws NoSuchRecordException {
-        // Test case 2: Varify set after insert new student
+        // Test case 2: Verify set after insert new student
         Degree degree = StudentManager.fetchDegree("deg0");
         Student student = StudentManager.newStudent("valid", "yes", degree);
-        Set<String> ids = (Set<String>) StudentManager.fetchAllStudentIds();
+        Collection<String> ids = StudentManager.fetchAllStudentIds();
         assertEquals(10001, ids.size());
         assertTrue(ids.contains(student.getId()));
-        assertTrue(ids.contains("id1"));
+        assertTrue(ids.contains("id0"));
         assertTrue(ids.contains("id9999"));
         assertFalse(ids.contains("id"));
         assertFalse(ids.contains("id1111111111111"));
     }
 
+    @Test
+    public void testPerformance() throws NoSuchRecordException {
+        // It should be able to handle e 500 random queries per second
+        Collection<String> ids = StudentManager.fetchAllStudentIds();
+        List<String> idList = new ArrayList<>(ids); // for iteration, convert to list
+        int listSize = idList.size();
+        Random random = new Random();
+        int count = 0;
+        long startTime = System.nanoTime();
+        long endTime = startTime + 1_000_000_000L; // 1 second in nanoseconds
+
+        while(System.nanoTime() < endTime) {
+            String randomId = idList.get(random.nextInt(listSize));
+            StudentManager.fetchStudent(randomId);
+            count++;
+        }
+        System.out.println("fetched: " + count);
+        assertTrue(count >= 500, "Expected at least 500 queries, but got " + count);
+    }
 }
