@@ -30,6 +30,12 @@ public class StudentManager {
      * Which likely connect to memory leak document later??
      * For now, lets use map of id and instance with private static
      * Later study and concern WeakReference<???> for instance
+     *
+     *
+     * HashMap: 834 queries/second
+     * WeakHashMap: 429 queries/second
+     *
+     * discuss speed and memory leak with this!!!!!!
      */
     private static final Map<String, Student> studentCache = new HashMap<>(); // ID, Student
     private static final Map<String, Degree> degreeCache = new HashMap<>(); // ID, Degree
