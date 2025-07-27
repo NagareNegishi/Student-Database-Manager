@@ -49,6 +49,10 @@
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
+                            <!-- Change filename -->
+                            <finalName>studentmanager</finalName>
+                            <!-- Don't want jar-with-dependencies part -->
+                            <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                     </execution>
                 </executions>
