@@ -13,3 +13,6 @@ target/
 
 # IntelliJ module files
 *.iml
+
+# For export test
+*.csv
