@@ -25,6 +25,35 @@
                 <configuration>
                 </configuration>
             </plugin>
+            <!-- Do not change above -->
+
+            <!-- Task 5: Create executable JAR with all dependencies -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <archive>
+                                <manifest>
+                                    <mainClass>
+                                        <!-- Change main class reference from template -->
+                                        nz.ac.wgtn.swen301.assignment1.cli.StudentManagerApp
+                                    </mainClass>
+                                </manifest>
+                            </archive>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Do not change below -->
         </plugins>
     </build>
     <dependencies>
