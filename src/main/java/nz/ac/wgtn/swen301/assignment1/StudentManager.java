@@ -69,7 +69,11 @@ public class StudentManager {
             String firstname = results.getString("first_name");
             String name = results.getString("name");
             String degreeID = results.getString("degree");
+
+
+            //Degree degree = fetchDegreeWithConnection(degreeID, conn);
             Degree degree = fetchDegree(degreeID);
+
             // but Constructor is (id, name, firstName, degree), bad design, but I can not change template
             Student student = new Student(id, name, firstname, degree);
 
@@ -379,6 +383,36 @@ public class StudentManager {
             return false;
         } catch (SQLException e) {
             throw new RuntimeException("Failed to check degree existence", e);
+        }
+    }
+
+    /**
+     * This function is only used by fetchStudent. when fetchStudent is internally try to fetch degree,
+     * the connection can be reused safely, closing connection is handled by fetchStudent.
+     * Return a degree instance with values from the row with the respective id in the database.
+     * If an instance with this id already exists, return the existing instance and do not create a second one.
+     * @param id the unique identifier of the degree to retrieve; must not be null or empty
+     * @param conn Connection passed from fetchStudent
+     * @return Degree instance with the specified ID
+     * @throws NoSuchRecordException if no record with such an id exists in the database
+     */
+    private static Degree fetchDegreeWithConnection(String id, Connection conn) throws NoSuchRecordException {
+        // Case already exists
+        if (degreeCache.containsKey(id)) return degreeCache.get(id);
+        // Fetch from the database
+        try {
+            PreparedStatement stmt = conn.prepareStatement("SELECT * FROM DEGREES WHERE id = ?");
+            stmt.setString(1, id);
+            ResultSet results = stmt.executeQuery();
+            // ID is unique, and none of provided record has null
+            if (!results.next()) throw new NoSuchRecordException();
+            // DEGREES table is :(id, name)
+            String name = results.getString("name");
+            Degree degree =  new Degree(id, name);
+            degreeCache.put(id, degree);
+            return degree;
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to fetch degree with ID: " + id, e);
         }
     }
 }
