@@ -106,10 +106,6 @@ public class StudentManagerApp {
                 }
 
 
-
-
-                System.out.println("option value is:" + line.getOptionValue("export"));
-
             }
 
 

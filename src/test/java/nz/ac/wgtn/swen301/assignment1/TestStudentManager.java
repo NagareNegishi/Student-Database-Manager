@@ -76,12 +76,8 @@ public class TestStudentManager {
     @Test
     public void testFetchStudent3() {
         // Test case 3: IllegalArgumentException for null/empty ID
-        assertThrows(IllegalArgumentException.class, () -> {
-            StudentManager.fetchStudent(null);
-        });
-        assertThrows(IllegalArgumentException.class, () -> {
-            StudentManager.fetchStudent("");
-        });
+        assertThrows(IllegalArgumentException.class, () -> StudentManager.fetchStudent(null));
+        assertThrows(IllegalArgumentException.class, () -> StudentManager.fetchStudent(""));
     }
 
     @Test
@@ -125,12 +121,8 @@ public class TestStudentManager {
     @Test
     public void testFetchDegree3() {
         // Test case 3: IllegalArgumentException for null/empty ID
-        assertThrows(IllegalArgumentException.class, () -> {
-            StudentManager.fetchDegree(null);
-        });
-        assertThrows(IllegalArgumentException.class, () -> {
-            StudentManager.fetchDegree("");
-        });
+        assertThrows(IllegalArgumentException.class, () -> StudentManager.fetchDegree(null));
+        assertThrows(IllegalArgumentException.class, () -> StudentManager.fetchDegree(""));
     }
 
     @Test
@@ -149,26 +141,20 @@ public class TestStudentManager {
         // Test case 1: Valid student
         Student student = StudentManager.fetchStudent("id0");
         StudentManager.remove(student);
-        assertThrows(NoSuchRecordException.class, () -> {
-            StudentManager.fetchStudent("id0");
-        });
+        assertThrows(NoSuchRecordException.class, () -> StudentManager.fetchStudent("id0"));
     }
 
     @Test
     public void testRemove2() {
         // Test case 2: NoSuchRecordException for invalid student
         Student invalidStudent = new Student("id-1", "invalid", "invalid", null);
-        assertThrows(NoSuchRecordException.class, () -> {
-            StudentManager.remove(invalidStudent);
-        });
+        assertThrows(NoSuchRecordException.class, () -> StudentManager.remove(invalidStudent));
     }
 
     @Test
     public void testRemove3() {
         // Test case 3: IllegalArgumentException for null
-        assertThrows(IllegalArgumentException.class, () -> {
-            StudentManager.remove(null);
-        });
+        assertThrows(IllegalArgumentException.class, () -> StudentManager.remove(null));
     }
 
     //TestStudentManager::testUpdate
@@ -202,29 +188,21 @@ public class TestStudentManager {
     public void testUpdate2() throws Exception {
         // Test case 2: NoSuchRecordException for invalid update
         Student invalidStudent = new Student("id-1", "Smith", "James", StudentManager.fetchDegree("deg0"));
-        assertThrows(NoSuchRecordException.class, () -> {
-            StudentManager.update(invalidStudent);
-        });
+        assertThrows(NoSuchRecordException.class, () -> StudentManager.update(invalidStudent));
     }
 
     @Test
     public void testUpdate3() throws Exception {
         // Test case 3: IllegalArgumentException for null and long name
-        assertThrows(IllegalArgumentException.class, () -> {
-            StudentManager.update(null);
-        });
+        assertThrows(IllegalArgumentException.class, () -> StudentManager.update(null));
 
         Student student = StudentManager.fetchStudent("id0");
         student.setName("longlonglonglong");
-        assertThrows(IllegalArgumentException.class, () -> {
-            StudentManager.update(student);
-        });
+        assertThrows(IllegalArgumentException.class, () -> StudentManager.update(student));
 
         student.setName("long");
         student.setFirstName("longlonglonglong");
-        assertThrows(IllegalArgumentException.class, () -> {
-            StudentManager.update(student);
-        });
+        assertThrows(IllegalArgumentException.class, () -> StudentManager.update(student));
     }
 
     // TestStudentManager::testNewStudent
@@ -293,13 +271,37 @@ public class TestStudentManager {
     public void testNewStudent4() throws Exception {
         // Test case 4: IllegalArgumentException for null and long name
         Degree degree = StudentManager.fetchDegree("deg0");
-        assertThrows(IllegalArgumentException.class, () -> {
-            StudentManager.newStudent("longlonglonglong", "yes", degree);
-        });
+        assertThrows(IllegalArgumentException.class, () ->
+                StudentManager.newStudent("longlonglonglong", "yes", degree));
+        assertThrows(IllegalArgumentException.class, () -> StudentManager.newStudent("valid", "longlonglonglong", degree));
+    }
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            StudentManager.newStudent("valid", "longlonglonglong", degree);
-        });
+    @Test
+    public void testNewStudent5() {
+        // Test case 5: IllegalArgumentException for null degree
+        assertThrows(IllegalArgumentException.class, () -> StudentManager.newStudent("valid", "yes", null));
+    }
+
+    @Test
+    public void testNewStudent6() throws Exception {
+        // Test case 6: Valid student, new degree with invalid id
+        Degree degree = new Degree("invalid999", "test"); // id varchar(5), 99 is max
+        Student student1 = StudentManager.newStudent("valid", "yes", degree);
+        Student student2 = StudentManager.fetchStudent(student1.getId());
+
+        assertNotNull(student1);
+        assertEquals(student1.getId(), student2.getId());
+        assertEquals("yes", student1.getFirstName());
+        assertEquals("valid", student1.getName());
+        assertEquals("test", student1.getDegree().getName());
+
+        assertTrue(student1.getDegree().getId().matches("deg\\d{1,2}"));
+        assertNotEquals("invalid999", student1.getDegree().getId());
+
+        assertEquals("yes", student2.getFirstName());
+        assertEquals("valid", student2.getName());
+        assertEquals("test", student2.getDegree().getName());
+        assertEquals(student1.getDegree().getId(), student2.getDegree().getId());
     }
 
     // TestStudentManager::testFetchAllStudentIds
@@ -345,7 +347,7 @@ public class TestStudentManager {
             StudentManager.fetchStudent(randomId);
             count++;
         }
-        System.out.println("fetched: " + count);
+        System.err.println("Performance test result: " + count + " queries/second (target: 500+)");
         assertTrue(count >= 500, "Expected at least 500 queries, but got " + count);
     }
 }

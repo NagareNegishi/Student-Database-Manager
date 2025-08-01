@@ -25,18 +25,8 @@ public class StudentManager {
 
     // THE FOLLOWING METHODS MUST BE IMPLEMENTED :
 
-    /**
-     * Return the existing instance, it suggests this class need to Cache instances
-     * Which likely connect to memory leak document later??
-     * For now, lets use map of id and instance with private static
-     * Later study and concern WeakReference<???> for instance
-     *
-     *
-     * HashMap: 834 queries/second
-     * WeakHashMap: 429 queries/second
-     *
-     * discuss speed and memory leak with this!!!!!!
-     */
+
+    //Cache for Student and Degree instances using WeakHashMap to allow garbage collection
     private static final Map<String, Student> studentCache = new WeakHashMap<>(); // ID, Student
     private static final Map<String, Degree> degreeCache = new WeakHashMap<>(); // ID, Degree
 
@@ -159,22 +149,11 @@ public class StudentManager {
         // not required, but help performance
         validateNameLengths(student.getName(), student.getFirstName());
 
-        /*
-        * ASK!!!!!!!!!!!!!!!!!!!
-        *
-        * - how i should treat name? can update or not?  -> do not update name
-        *
-        * - also can i remove dummy test? -> keep it
-        * - weak reference for map
-        *
-        * - is name <10 or <=10??
-        * */
-
         // Update database first
         try (Connection conn = DriverManager.getConnection("jdbc:derby:memory:studentdb")){
             PreparedStatement stmt = conn.prepareStatement("UPDATE STUDENTS SET first_name = ?, name = ?, degree = ? WHERE id = ?");
             stmt.setString(1, student.getFirstName());
-            stmt.setString(2, student.getName());
+            stmt.setString(2, student.getName()); // if name is not allowed to update, remove this line and "name = ?,", adjust index
             stmt.setString(3, student.getDegree().getId());
             stmt.setString(4, student.getId());
             int rowsAffected  = stmt.executeUpdate();
@@ -192,31 +171,33 @@ public class StudentManager {
      * Note that names and first names can only be max 1o characters long.
      * If the Degree does not exist, create a new row in the database for it. 
      * There is no special handling required to enforce this, just ensure that tests only use values with < 10 characters.
-     * @param name
-     * @param firstName
-     * @param degree
+     * @param name last name of new student
+     * @param firstName first name of new student
+     * @param degree degree of new student
      * @return a freshly created student instance
      * This functionality is to be tested in nz.ac.wgtn.swen301.assignment1.TestStudentManager::testNewStudent (followed by optional numbers if multiple tests are used)
      */
     public static Student newStudent(String name,String firstName,Degree degree) {
-
         validateNameLengths(name, firstName);
         if (degree == null) throw new IllegalArgumentException("degree must not be null");
 
-        // can i reject null id?? !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
         Degree fixed;
-        if (degree.getId() != null && degreeExists(degree.getId())) {
-            // Use existing degree in database to override this instance to sync (prevent name mismatch)
+        String degreeId = degree.getId();
+        if (degreeId == null || !degreeId.matches("deg\\d{1,2}")) {
+            // Case 1: No ID provided or invalid - generate new ID and create degree
+            degreeId = nextDegreeId();
+            System.err.println("Warning: degree has invalid ID, using: " + degreeId); // user need feedback
+            fixed = new Degree(degreeId, degree.getName());
+            insertDegree(fixed);
+        } else if (degreeExists(degreeId)) {
+            // Case 2: ID exists - use existing degree from database
             try {
-                fixed = fetchDegree(degree.getId());
+                fixed = fetchDegree(degreeId);
             } catch (NoSuchRecordException e) {
-                fixed = degree;
+                throw new RuntimeException("Inconsistent database state: ", e);
             }
         } else {
-            // if id is null, provide next available id
-            // It depends on requirement, if we can reject null id, it is simple           !!!!!!!!!!!!!!!!!!!!!!!!!
-            String degreeId = (degree.getId() != null) ? degree.getId() : nextDegreeId();
+            // Case 3: ID provided but doesn't exist - create with provided ID
             fixed = new Degree(degreeId, degree.getName());
             insertDegree(fixed);
         }
@@ -257,13 +238,14 @@ public class StudentManager {
 
     /**
      * Helper method to ensure names and first names of Student can only be max 10 characters long.
-     * As database do not have not null constraint, it will not prevent null
+     * While database has its own length constraint, this provides early exit and explicit feedback.
+     * As database does not have NOT NULL constraints, it will not prevent null values.
      * @param name name of Student
      * @param firstName first name of Student
      */
     private static void validateNameLengths(String name, String firstName){
         if (name != null && name.length() > 10) {
-            throw new IllegalArgumentException("student name must be up to 10 characters"); // check if its < 10 or <= 10!!!
+            throw new IllegalArgumentException("student name must be up to 10 characters");
         }
         if (firstName != null && firstName.length() > 10) {
             throw new IllegalArgumentException("student first name must be up to 10 characters");
@@ -273,11 +255,7 @@ public class StudentManager {
     /**
      * Generates the next available student ID by finding the highest existing ID and incrementing it.
      * Handles the case where the STUDENTS table is empty by returning "id0".
-     *
-     *
-     * It will not fill the gap of existing ids      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-     *
-     *
+     * Uses MAX(id) approach which does not fill gaps in existing IDs.
      * @return the next available student ID in format "id{number}"
      * @throws RuntimeException if a database error occurs while querying for the maximum ID
      */
@@ -385,10 +363,14 @@ public class StudentManager {
     }
 
     /**
-     * This function is only used by fetchStudent. when fetchStudent is internally try to fetch degree,
-     * the connection can be reused safely, closing connection is handled by fetchStudent.
-     * Return a degree instance with values from the row with the respective id in the database.
-     * If an instance with this id already exists, return the existing instance and do not create a second one.
+     * Connection reuse optimization for fetchStudent().
+     * Performance impact varies by environment - kept for potential future use.
+     * Currently unused due to mixed performance results across different systems.
+     * <br>
+     * This function is designed to be used by fetchStudent() when internally fetching degree data.
+     * The connection can be reused safely, with connection closing handled by the caller.
+     * Returns a degree instance with values from the row with the respective id in the database.
+     * If an instance with this id already exists, returns the existing instance without creating a second one.
      * @param id the unique identifier of the degree to retrieve; must not be null or empty
      * @param conn Connection passed from fetchStudent
      * @return Degree instance with the specified ID
