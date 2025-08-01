@@ -10,3 +10,13 @@ To set up the project run the following command first from a terminal:
 
 
 Then open the project in an IDE. Major IDEs (Eclipse, IntelliJ) support the Maven project format. VSCode, Sublime etc may require additional plugins to support Maven. 
+
+
+
+## Memory Leak Analysis
+
+The design uses WeakHashMap for caching Student and Degree instances, reducing memory leak risk by allowing Garbage Collection (GC) of unreferenced objects. HashMap maintains strong references that prevent GC, causing potential memory leaks as cached objects accumulate indefinitely. 
+
+Initially HashMap was used for better performance, as WeakHashMap failed to consistently pass the 500 queries/second requirement on development hardware. In lab environments, both implementations exceed the performance requirement, making WeakHashMap's memory safety advantageous. 
+
+However, WeakHashMap provides no control over GC timing. Guava Cache would offer better control with configurable eviction policies while maintaining reasonable performance and memory safety.

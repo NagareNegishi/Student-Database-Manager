@@ -4,7 +4,7 @@ import nz.ac.wgtn.swen301.studentdb.*;
 
 import java.sql.*;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.WeakHashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -37,8 +37,8 @@ public class StudentManager {
      *
      * discuss speed and memory leak with this!!!!!!
      */
-    private static final Map<String, Student> studentCache = new HashMap<>(); // ID, Student
-    private static final Map<String, Degree> degreeCache = new HashMap<>(); // ID, Degree
+    private static final Map<String, Student> studentCache = new WeakHashMap<>(); // ID, Student
+    private static final Map<String, Degree> degreeCache = new WeakHashMap<>(); // ID, Degree
 
     /**
      * Return a student instance with values from the row with the respective id in the database.
@@ -70,8 +70,6 @@ public class StudentManager {
             String name = results.getString("name");
             String degreeID = results.getString("degree");
 
-
-            //Degree degree = fetchDegreeWithConnection(degreeID, conn);
             Degree degree = fetchDegree(degreeID);
 
             // but Constructor is (id, name, firstName, degree), bad design, but I can not change template
