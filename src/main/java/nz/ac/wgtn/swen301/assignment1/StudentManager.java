@@ -5,9 +5,9 @@ import nz.ac.wgtn.swen301.studentdb.*;
 import java.sql.*;
 import java.util.Collection;
 import java.util.WeakHashMap;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.Map;
-import java.util.Set;
+import java.util.List;
 
 /**
  * A student manager providing basic CRUD operations for instances of Student, and a read operation for instances of Degree.
@@ -153,7 +153,7 @@ public class StudentManager {
         try (Connection conn = DriverManager.getConnection("jdbc:derby:memory:studentdb")){
             PreparedStatement stmt = conn.prepareStatement("UPDATE STUDENTS SET first_name = ?, name = ?, degree = ? WHERE id = ?");
             stmt.setString(1, student.getFirstName());
-            stmt.setString(2, student.getName()); // if name is not allowed to update, remove this line and "name = ?,", adjust index
+            stmt.setString(2, student.getName());
             stmt.setString(3, student.getDegree().getId());
             stmt.setString(4, student.getId());
             int rowsAffected  = stmt.executeUpdate();
@@ -209,17 +209,16 @@ public class StudentManager {
 
     /**
      * Get all student ids currently being used in the database.
-     * @return Collection<String>, use HashSet, since id is unique (primary key)
+     * @return Collection<String>, use ArrayList to sort IDs (can be HashSet if uniqueness is primary concern)
      * This functionality is to be tested in nz.ac.wgtn.swen301.assignment1.TestStudentManager::testFetchAllStudentIds (followed by optional numbers if multiple tests are used)
      */
     public static Collection<String> fetchAllStudentIds() {
-        Set<String> ids = new HashSet<>();
+        List<String> ids = new ArrayList<>();
         try (Connection conn = DriverManager.getConnection("jdbc:derby:memory:studentdb")){
             Statement stmt = conn.createStatement();
-            ResultSet results = stmt.executeQuery("SELECT id FROM STUDENTS");
+            ResultSet results = stmt.executeQuery("SELECT id FROM STUDENTS ORDER BY id");
             while (results.next()) {
-                String id = results.getString("id");
-                ids.add(id);
+                ids.add(results.getString("id"));
             }
         } catch (SQLException e) {
             throw new RuntimeException("Failed to get all student IDs", e);
@@ -362,37 +361,38 @@ public class StudentManager {
         }
     }
 
-    /**
-     * Connection reuse optimization for fetchStudent().
-     * Performance impact varies by environment - kept for potential future use.
-     * Currently unused due to mixed performance results across different systems.
-     * <br>
-     * This function is designed to be used by fetchStudent() when internally fetching degree data.
-     * The connection can be reused safely, with connection closing handled by the caller.
-     * Returns a degree instance with values from the row with the respective id in the database.
-     * If an instance with this id already exists, returns the existing instance without creating a second one.
-     * @param id the unique identifier of the degree to retrieve; must not be null or empty
-     * @param conn Connection passed from fetchStudent
-     * @return Degree instance with the specified ID
-     * @throws NoSuchRecordException if no record with such an id exists in the database
-     */
-    private static Degree fetchDegreeWithConnection(String id, Connection conn) throws NoSuchRecordException {
-        // Case already exists
-        if (degreeCache.containsKey(id)) return degreeCache.get(id);
-        // Fetch from the database
-        try {
-            PreparedStatement stmt = conn.prepareStatement("SELECT * FROM DEGREES WHERE id = ?");
-            stmt.setString(1, id);
-            ResultSet results = stmt.executeQuery();
-            // ID is unique, and none of provided record has null
-            if (!results.next()) throw new NoSuchRecordException();
-            // DEGREES table is :(id, name)
-            String name = results.getString("name");
-            Degree degree =  new Degree(id, name);
-            degreeCache.put(id, degree);
-            return degree;
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to fetch degree with ID: " + id, e);
-        }
-    }
+//    /**
+//     * Connection reuse optimization for fetchStudent().
+//     * Performance impact varies by environment - kept for potential future use.
+//     * Currently unused due to mixed performance results across different systems.
+//     * <br>
+//     * This function is designed to be used by fetchStudent() when internally fetching degree data.
+//     * The connection can be reused safely, with connection closing handled by the caller.
+//     * Returns a degree instance with values from the row with the respective id in the database.
+//     * If an instance with this id already exists, returns the existing instance without creating a second one.
+//     * @param id the unique identifier of the degree to retrieve; must not be null or empty
+//     * @param conn Connection passed from fetchStudent
+//     * @return Degree instance with the specified ID
+//     * @throws NoSuchRecordException if no record with such an id exists in the database
+//     */
+//    private static Degree fetchDegreeWithConnection(String id, Connection conn) throws NoSuchRecordException {
+//        // Case already exists
+//        if (degreeCache.containsKey(id)) return degreeCache.get(id);
+//        // Fetch from the database
+//        try {
+//            PreparedStatement stmt = conn.prepareStatement("SELECT * FROM DEGREES WHERE id = ?");
+//            stmt.setString(1, id);
+//            ResultSet results = stmt.executeQuery();
+//            // ID is unique, and none of provided record has null
+//            if (!results.next()) throw new NoSuchRecordException();
+//            // DEGREES table is : (id, name)
+//            String name = results.getString("name");
+//            Degree degree =  new Degree(id, name);
+//            degreeCache.put(id, degree);
+//            return degree;
+//        } catch (SQLException e) {
+//            throw new RuntimeException("Failed to fetch degree with ID: " + id, e);
+//        }
+//    }
+
 }

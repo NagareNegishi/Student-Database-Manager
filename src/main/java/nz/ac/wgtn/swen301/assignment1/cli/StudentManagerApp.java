@@ -24,11 +24,6 @@ public class StudentManagerApp {
         options.addOption("export", true, "write all student records to a file in CSV format");
 
         CommandLineParser parser = new DefaultParser();
-
-        // need to 2 point
-        // -  printing degree is truly not required or give us some point?
-        // -  sorting needed for option 2 and 3?
-
         try {
             CommandLine line = parser.parse(options, arg);
             if (line.hasOption("select")) {
@@ -62,13 +57,10 @@ public class StudentManagerApp {
     }
 
     /**
-     * Handle -all option: display all student records sorted by ID
+     * Handle -all option: display all student records, no sorting required
      */
     private static void handleAll() {
         Collection<String> ids = StudentManager.fetchAllStudentIds();
-
-        // if sorting list is required, make ids list and Collections.sort
-
         for (String id: ids) {
             try {
                 Student student = StudentManager.fetchStudent(id);
@@ -82,7 +74,7 @@ public class StudentManagerApp {
     }
 
     /**
-     * Handle -export option: write all student records to CSV file
+     * Handle -export option: write all student records to CSV file, use the exact filename, no sorting required
      * <br>
      * Design Decision: StringBuilder vs PrintWriter approach
      * Option 1 (chosen): Build complete string first, then write once (StringBuilder)
@@ -97,9 +89,6 @@ public class StudentManagerApp {
         StringBuilder csv = new StringBuilder();
         csv.append("id,first_name,name,degree\n");
         Collection<String> ids = StudentManager.fetchAllStudentIds();
-
-        // if sorting list is required, make ids list and Collections.sort
-
         for (String id: ids) {
             try {
                 Student student = StudentManager.fetchStudent(id);
@@ -111,10 +100,9 @@ public class StudentManagerApp {
                 System.err.println("Database error occurred: " + e.getMessage());
             }
         }
-        // if i need to enforce format
-        // String csvFilename = filename.endsWith(".csv") ? filename : filename + ".csv";
-        try {Files.write(Paths.get(filename), csv.toString().getBytes());}
-        catch (java.io.IOException e){
+        try {
+            Files.write(Paths.get(filename), csv.toString().getBytes());
+        } catch (java.io.IOException e){
             System.err.println("Error writing file: " + e.getMessage());
         }
     }

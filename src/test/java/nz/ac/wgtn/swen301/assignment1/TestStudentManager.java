@@ -323,7 +323,7 @@ public class TestStudentManager {
 
     @Test
     public void testFetchAllStudentIds1(){
-        // Test case 1: Verify set
+        // Test case 1: Verify Collection
         Collection<String> ids = StudentManager.fetchAllStudentIds();
         assertNotNull(ids);
         assertEquals(10000, ids.size());
@@ -334,7 +334,7 @@ public class TestStudentManager {
 
     @Test
     public void testFetchAllStudentIds2() throws NoSuchRecordException {
-        // Test case 2: Verify set after insert new student
+        // Test case 2: Verify Collection after insert new student
         Degree degree = StudentManager.fetchDegree("deg0");
         Student student = StudentManager.newStudent("valid", "yes", degree);
         Collection<String> ids = StudentManager.fetchAllStudentIds();
