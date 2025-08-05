@@ -6,11 +6,13 @@ import nz.ac.wgtn.swen301.studentdb.Student;
 import nz.ac.wgtn.swen301.studentdb.StudentDB;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -19,6 +21,9 @@ import static org.junit.jupiter.api.Assertions.*;
  * Unit tests for StudentManager, to be extended.
  */
 public class TestStudentManager {
+
+    // For testPerformance
+    private List<String> allStudentIds;
 
     // DO NOT REMOVE THE FOLLOWING -- THIS WILL ENSURE THAT THE DATABASE IS AVAILABLE
     // AND IN ITS INITIAL STATE BEFORE EACH TEST RUNS
@@ -35,9 +40,19 @@ public class TestStudentManager {
         assertNotNull(student);
     }
 
+    // Reset memory resources
     @BeforeEach
     public void resetCache() {
         StudentManager.reset();
+    }
+
+    // Preparation for performance test
+    @BeforeEach
+    public void prepareTestData() {
+        allStudentIds = new ArrayList<>();
+        for (int i = 0; i < 10000; i++) {
+            allStudentIds.add("id" + i);
+        }
     }
 
     // TestStudentManager::testFetchStudent
@@ -332,22 +347,36 @@ public class TestStudentManager {
     }
 
     @Test
+    @Timeout(value = 1, unit = TimeUnit.SECONDS)
     public void testPerformance() throws NoSuchRecordException {
-        // It should be able to handle e 500 random queries per second
-        Collection<String> ids = StudentManager.fetchAllStudentIds();
-        List<String> idList = new ArrayList<>(ids); // for iteration, convert to list
-        int listSize = idList.size();
+        // It should be able to handle 500 random queries per second
         Random random = new Random();
-        int count = 0;
-        long startTime = System.nanoTime();
-        long endTime = startTime + 1_000_000_000L; // 1 second in nanoseconds
-
-        while(System.nanoTime() < endTime) {
-            String randomId = idList.get(random.nextInt(listSize));
+        for (int i = 0; i < 500; i++) {
+            String randomId = allStudentIds.get(random.nextInt(allStudentIds.size()));
             StudentManager.fetchStudent(randomId);
-            count++;
         }
-        System.err.println("Performance test result: " + count + " queries/second (target: 500+)");
-        assertTrue(count >= 500, "Expected at least 500 queries, but got " + count);
     }
+
+// We are asked to use @Timeout for testPerformance(), but tests with @Timeout cannot provide
+// the actual number of queries achieved. This information is crucial for performance analysis.
+// The alternative implementation below provides detailed performance,
+// but is commented out to comply with the instructor's suggestion to use @Timeout.
+//
+//    @Test
+//    public void testPerformance() throws NoSuchRecordException {
+//        // It should be able to handle 500 random queries per second
+//        Random random = new Random();
+//        int count = 0;
+//        long startTime = System.nanoTime();
+//        long endTime = startTime + 1_000_000_000L; // 1 second in nanoseconds
+//
+//        while (System.nanoTime() < endTime) {
+//            String randomId = allStudentIds.get(random.nextInt(allStudentIds.size()));
+//            StudentManager.fetchStudent(randomId);
+//            count++;
+//        }
+//        System.err.println("Performance test result: " + count + " queries/second (target: 500+)");
+//        assertTrue(count >= 500, "Expected at least 500 queries, but got " + count);
+//    }
+
 }
