@@ -62,7 +62,7 @@ public class StudentManager {
 
             Degree degree = fetchDegree(degreeID);
 
-            // but Constructor is (id, name, firstName, degree), bad design, but I can not change template
+            // but Constructor is (id, name, firstName, degree), mismatching
             Student student = new Student(id, name, firstname, degree);
 
             studentCache.put(id, student);
