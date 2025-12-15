@@ -38,15 +38,13 @@
                             <archive>
                                 <manifest>
                                     <mainClass>
-                                        <!-- Change main class reference from template -->
-                                        io.github.nagare.Student-Database-Manager.cli.StudentManagerApp
+                                        io.github.nagare.studentdb.cli.StudentManagerApp
                                     </mainClass>
                                 </manifest>
                             </archive>
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
-                            <!-- Change filename -->
                             <finalName>studentmanager</finalName>
                             <!-- Don't want jar-with-dependencies part -->
                             <appendAssemblyId>false</appendAssemblyId>

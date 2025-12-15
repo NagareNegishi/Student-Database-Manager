@@ -22,7 +22,7 @@ public class TestStudentManager {
 
     @BeforeEach
     public  void init () {
-        StudentDB.init();
+        Database.init();
     }
 
 
