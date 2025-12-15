@@ -93,8 +93,8 @@ public class Database {
             try (PreparedStatement pstmt = conn.prepareStatement(studentInsert)) {
                 for (int i = 0; i < 10000; i++) {
                     pstmt.setString(1, "id" + i);
-                    pstmt.setString(2, LAST_NAMES[i % LAST_NAMES.length]);
-                    pstmt.setString(3, FIRST_NAMES[i % FIRST_NAMES.length]);
+                    pstmt.setString(2, FIRST_NAMES[i % FIRST_NAMES.length]);
+                    pstmt.setString(3, LAST_NAMES[i % LAST_NAMES.length]);
                     pstmt.setString(4, "deg" + (i % 10));
                     pstmt.addBatch();
 
