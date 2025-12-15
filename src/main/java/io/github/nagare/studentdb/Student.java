@@ -14,10 +14,10 @@ public class Student {
     public Student() {
     }
 
-    public Student(String id, String firstName, String name, Degree degree) {
+    public Student(String id, String name, String firstName, Degree degree) {
         this.id = id;
+        this.name = name;              // parameter order: name comes BEFORE firstName
         this.firstName = firstName;
-        this.name = name;
         this.degree = degree;
     }
 
