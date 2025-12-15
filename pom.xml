@@ -1,12 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>nz.ac.wgtn.swen301</groupId>
-    <artifactId>assignment1</artifactId>
+    <groupId>io.github.nagare</groupId>
+    <artifactId>student-database-manager</artifactId>
     <packaging>jar</packaging>
     <version>1.0.0</version>
-    <name>swen301-assignment1</name>
-    <url>http://maven.apache.org</url>
+    <name>Student Database Manager</name>
     <build>
         <plugins>
             <plugin>
@@ -25,9 +24,7 @@
                 <configuration>
                 </configuration>
             </plugin>
-            <!-- Do not change above -->
-
-            <!-- Task 5: Create executable JAR with all dependencies -->
+            <!-- Create executable JAR with all dependencies -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
@@ -42,7 +39,7 @@
                                 <manifest>
                                     <mainClass>
                                         <!-- Change main class reference from template -->
-                                        nz.ac.wgtn.swen301.assignment1.cli.StudentManagerApp
+                                        io.github.nagare.Student-Database-Manager.cli.StudentManagerApp
                                     </mainClass>
                                 </manifest>
                             </archive>
@@ -57,7 +54,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- Do not change below -->
         </plugins>
     </build>
     <dependencies>
@@ -90,11 +86,5 @@
             <version>33.2.0-jre</version>
         </dependency>
 
-        <!-- local dependency to setup database - see readme for installation required -->
-        <dependency>
-            <groupId>nz.ac.wgtn.swen301</groupId>
-            <artifactId>studentdb</artifactId>
-            <version>2.0.0</version>
-        </dependency>
     </dependencies>
 </project>
