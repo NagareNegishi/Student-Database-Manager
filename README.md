@@ -1,22 +1,51 @@
-## SWEN301 Assignment 1 Template
+# Student Database Manager
 
-Please refer to the assignment brief for details. 
+A Java-based CRUD application for managing student records using JDBC and an in-memory Derby database. Features a command-line interface and demonstrates object-relational mapping patterns.
 
-The project uses Maven. If you run this on your private computer, you need to install this first. Maven can be downloaded from [https://maven.apache.org/download.cgi](https://maven.apache.org/download.cgi).
+## Features
 
-To set up the project run the following command first from a terminal:
+- CRUD operations for student and degree records
+- In-memory Derby database with pre-populated test data
+- Command-line interface for querying and exporting data
+- CSV export functionality
+- Performance-optimized caching layer
 
-`mvn install:install-file -Dfile=lib/studentdb-2.0.0.jar -DgroupId=nz.ac.wgtn.swen301 -DartifactId=studentdb -Dversion=2.0.0 -Dpackaging=jar`
+## Setup
 
+Install the local dependency:
+```bash
+mvn install:install-file -Dfile=lib/studentdb-2.0.0.jar \
+  -DgroupId=nz.ac.wgtn.swen301 \
+  -DartifactId=studentdb \
+  -Dversion=2.0.0 \
+  -Dpackaging=jar
+```
 
-Then open the project in an IDE. Major IDEs (Eclipse, IntelliJ) support the Maven project format. VSCode, Sublime etc may require additional plugins to support Maven. 
+Build the project:
+```bash
+mvn clean package
+```
 
+## Usage
 
+Run the executable JAR:
+```bash
+# Fetch specific student
+java -jar target/studentmanager.jar -select id42
 
-## Memory Leak Analysis
+# List all students
+java -jar target/studentmanager.jar -all
 
-The design uses WeakHashMap for caching Student and Degree instances, reducing memory leak risk by allowing Garbage Collection (GC) of unreferenced objects. HashMap maintains strong references that prevent GC, causing potential memory leaks as cached objects accumulate indefinitely. 
+# Export to CSV
+java -jar target/studentmanager.jar -export students.csv
+```
 
-Initially HashMap was used for better performance, as WeakHashMap failed to consistently pass the 500 queries/second requirement on development hardware. In lab environments, both implementations exceed the performance requirement, making WeakHashMap's memory safety advantageous. 
+## Database Schema
 
-However, WeakHashMap provides no control over GC timing. Guava Cache would offer better control with configurable eviction policies while maintaining reasonable performance and memory safety.
+**STUDENTS**: `id`, `first_name`, `name`, `degree` (10,000 records: id0-id9999)
+
+**DEGREES**: `id`, `name` (10 records: deg0-deg9)
+
+## Architecture
+
+The implementation uses `WeakHashMap` for caching to prevent memory leaks by allowing garbage collection of unreferenced objects. This provides memory safety while maintaining the required performance threshold of 500+ queries/second.
