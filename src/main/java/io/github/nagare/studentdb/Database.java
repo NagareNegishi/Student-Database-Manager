@@ -15,12 +15,12 @@ public class Database {
     private static final String[] LAST_NAMES = {
             "Smith", "Jones", "Taylor", "Muller", "Tipene", "MacDonald",
             "Smith", "Ramirez", "Wang", "Singh", "Petersen", "da Silva",
-            "Kumar", "Patel", "Hashimoto", "Wakanabe", "Kim", "Hansen", "Mobutu"
+            "Kumar", "Patel", "Hashimoto", "Watanabe", "Kim", "Hansen", "Mobutu"
     };
 
     private static final String[] FIRST_NAMES = {
             "James", "John", "Janice", "Max", "Keira", "Tim", "Tom",
-            "Kate", "Perry", "Alex", "Dave", "Thomas", "Sue", "Monoa", "Joao"
+            "Kate", "Perry", "Alex", "Dave", "Thomas", "Sue", "Moana", "Joao"
     };
 
     private static final String[][] DEGREES = {
