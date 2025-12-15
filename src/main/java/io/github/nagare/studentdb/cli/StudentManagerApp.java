@@ -1,8 +1,8 @@
 package io.github.nagare.studentdb.cli;
 
 import io.github.nagare.studentdb.StudentManager;
-import nz.ac.wgtn.swen301.studentdb.NoSuchRecordException;
-import nz.ac.wgtn.swen301.studentdb.Student;
+import io.github.nagare.studentdb.NoSuchRecordException;
+import io.github.nagare.studentdb.Student;
 import org.apache.commons.cli.*;
 
 import java.nio.file.Files;
