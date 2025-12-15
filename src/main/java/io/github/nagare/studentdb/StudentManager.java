@@ -1,4 +1,4 @@
-package nz.ac.wgtn.swen301.assignment1;
+package io.github.nagare.studentdb;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

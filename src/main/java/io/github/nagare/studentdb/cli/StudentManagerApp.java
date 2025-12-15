@@ -1,6 +1,6 @@
-package nz.ac.wgtn.swen301.assignment1.cli;
+package io.github.nagare.studentdb.cli;
 
-import nz.ac.wgtn.swen301.assignment1.StudentManager;
+import io.github.nagare.studentdb.StudentManager;
 import nz.ac.wgtn.swen301.studentdb.NoSuchRecordException;
 import nz.ac.wgtn.swen301.studentdb.Student;
 import org.apache.commons.cli.*;
