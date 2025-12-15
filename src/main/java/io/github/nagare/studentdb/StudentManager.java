@@ -12,10 +12,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-import nz.ac.wgtn.swen301.studentdb.Degree;
-import nz.ac.wgtn.swen301.studentdb.NoSuchRecordException;
-import nz.ac.wgtn.swen301.studentdb.Student;
-import nz.ac.wgtn.swen301.studentdb.StudentDB;
+import io.github.nagare.studentdb.Degree;
+import io.github.nagare.studentdb.NoSuchRecordException;
+import io.github.nagare.studentdb.Student;
+import io.github.nagare.studentdb.Database;
 
 /**
  * A student manager providing basic CRUD operations for instances of Student, and a read operation for instances of Degree.
@@ -23,7 +23,7 @@ import nz.ac.wgtn.swen301.studentdb.StudentDB;
  */
 public class StudentManager {
 
-    static { StudentDB.init();}
+    static { Database.init();}
 
 
     //Cache for Student and Degree instances using WeakHashMap to allow garbage collection
