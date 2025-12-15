@@ -14,9 +14,10 @@ public class Student {
     public Student() {
     }
 
+    // parameter order: name comes BEFORE firstName
     public Student(String id, String name, String firstName, Degree degree) {
         this.id = id;
-        this.name = name;              // parameter order: name comes BEFORE firstName
+        this.name = name;
         this.firstName = firstName;
         this.degree = degree;
     }
