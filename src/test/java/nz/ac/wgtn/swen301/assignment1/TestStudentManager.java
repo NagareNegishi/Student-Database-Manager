@@ -348,26 +348,4 @@ public class TestStudentManager {
         }
     }
 
-// We are asked to use @Timeout for testPerformance(), but tests with @Timeout cannot provide
-// the actual number of queries achieved. This information is crucial for performance analysis.
-// The alternative implementation below provides detailed performance,
-// but is commented out to comply with the instructor's suggestion to use @Timeout.
-//
-//    @Test
-//    public void testPerformance() throws NoSuchRecordException {
-//        // It should be able to handle 500 random queries per second
-//        Random random = new Random();
-//        int count = 0;
-//        long startTime = System.nanoTime();
-//        long endTime = startTime + 1_000_000_000L; // 1 second in nanoseconds
-//
-//        while (System.nanoTime() < endTime) {
-//            String randomId = allStudentIds.get(random.nextInt(allStudentIds.size()));
-//            StudentManager.fetchStudent(randomId);
-//            count++;
-//        }
-//        System.err.println("Performance test result: " + count + " queries/second (target: 500+)");
-//        assertTrue(count >= 500, "Expected at least 500 queries, but got " + count);
-//    }
-
 }

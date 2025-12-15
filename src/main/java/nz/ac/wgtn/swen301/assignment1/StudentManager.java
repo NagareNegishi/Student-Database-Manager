@@ -23,15 +23,7 @@ import nz.ac.wgtn.swen301.studentdb.StudentDB;
  */
 public class StudentManager {
 
-    // DO NOT REMOVE THE FOLLOWING -- THIS WILL ENSURE THAT THE DATABASE IS AVAILABLE
-    // AND THE APPLICATION CAN CONNECT TO IT WITH JDBC
-    static {
-        StudentDB.init();
-    }
-
-    // DO NOT REMOVE BLOCK ENDS HERE
-
-    // THE FOLLOWING METHODS MUST BE IMPLEMENTED :
+    static { StudentDB.init();}
 
 
     //Cache for Student and Degree instances using WeakHashMap to allow garbage collection
