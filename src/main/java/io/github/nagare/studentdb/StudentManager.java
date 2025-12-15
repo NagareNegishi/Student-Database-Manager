@@ -12,11 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-import io.github.nagare.studentdb.Degree;
-import io.github.nagare.studentdb.NoSuchRecordException;
-import io.github.nagare.studentdb.Student;
-import io.github.nagare.studentdb.Database;
-
 /**
  * A student manager providing basic CRUD operations for instances of Student, and a read operation for instances of Degree.
  * @author jens dietrich

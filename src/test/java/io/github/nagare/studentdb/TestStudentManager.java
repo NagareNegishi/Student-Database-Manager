@@ -12,11 +12,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
-import nz.ac.wgtn.swen301.studentdb.Degree;
-import nz.ac.wgtn.swen301.studentdb.NoSuchRecordException;
-import nz.ac.wgtn.swen301.studentdb.Student;
-import nz.ac.wgtn.swen301.studentdb.StudentDB;
-
 /**
  * Unit tests for StudentManager, to be extended.
  */
