@@ -1,13 +1,21 @@
 package nz.ac.wgtn.swen301.assignment1;
 
-import nz.ac.wgtn.swen301.studentdb.*;
-
-import java.sql.*;
-import java.util.Collection;
-import java.util.WeakHashMap;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
+
+import nz.ac.wgtn.swen301.studentdb.Degree;
+import nz.ac.wgtn.swen301.studentdb.NoSuchRecordException;
+import nz.ac.wgtn.swen301.studentdb.Student;
+import nz.ac.wgtn.swen301.studentdb.StudentDB;
 
 /**
  * A student manager providing basic CRUD operations for instances of Student, and a read operation for instances of Degree.
