@@ -2,6 +2,7 @@ package io.github.nagare.studentdb;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.Statement;
 
 /**
@@ -40,11 +41,13 @@ public class Database {
      * Creates tables and populates with test data.
      */
     public static void init() {
-        try {
-            // Try to drop existing tables
-            try (Connection conn = DriverManager.getConnection(DB_URL + ";create=true");
-                 Statement stmt = conn.createStatement()) {
+        try (Connection conn = DriverManager.getConnection(DB_URL + ";create=true")) {
 
+            // Disable auto-commit for batch operations
+            conn.setAutoCommit(false);
+
+            try (Statement stmt = conn.createStatement()) {
+                // Drop existing tables
                 try {
                     stmt.execute("DROP TABLE STUDENTS");
                 } catch (Exception e) {
@@ -72,29 +75,41 @@ public class Database {
                                 "name VARCHAR(100) NOT NULL, " +
                                 "degree VARCHAR(50) NOT NULL)"
                 );
-
-                // Insert degrees
-                for (String[] degree : DEGREES) {
-                    stmt.execute(String.format(
-                            "INSERT INTO DEGREES (id, name) VALUES ('%s', '%s')",
-                            degree[0], degree[1]
-                    ));
-                }
-
-                // Insert students (10,000 records)
-                for (int i = 0; i < 10000; i++) {
-                    String id = "id" + i;
-                    String firstName = FIRST_NAMES[i % FIRST_NAMES.length];
-                    String lastName = LAST_NAMES[i % LAST_NAMES.length];
-                    String degreeId = "deg" + (i % 10);
-
-                    stmt.execute(String.format(
-                            "INSERT INTO STUDENTS (id, first_name, name, degree) " +
-                                    "VALUES ('%s', '%s', '%s', '%s')",
-                            id, firstName, lastName, degreeId
-                    ));
-                }
             }
+
+            // Insert degrees using PreparedStatement
+            String degreeInsert = "INSERT INTO DEGREES (id, name) VALUES (?, ?)";
+            try (PreparedStatement pstmt = conn.prepareStatement(degreeInsert)) {
+                for (String[] degree : DEGREES) {
+                    pstmt.setString(1, degree[0]);
+                    pstmt.setString(2, degree[1]);
+                    pstmt.addBatch();
+                }
+                pstmt.executeBatch();
+            }
+
+            // Insert students using PreparedStatement with batching
+            String studentInsert = "INSERT INTO STUDENTS (id, first_name, name, degree) VALUES (?, ?, ?, ?)";
+            try (PreparedStatement pstmt = conn.prepareStatement(studentInsert)) {
+                for (int i = 0; i < 10000; i++) {
+                    pstmt.setString(1, "id" + i);
+                    pstmt.setString(2, FIRST_NAMES[i % FIRST_NAMES.length]);
+                    pstmt.setString(3, LAST_NAMES[i % LAST_NAMES.length]);
+                    pstmt.setString(4, "deg" + (i % 10));
+                    pstmt.addBatch();
+
+                    // Execute batch every 1000 records to avoid memory issues
+                    if ((i + 1) % 1000 == 0) {
+                        pstmt.executeBatch();
+                    }
+                }
+                // Execute remaining batch
+                pstmt.executeBatch();
+            }
+
+            // Commit the transaction
+            conn.commit();
+
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize database", e);
         }
